@@ -13,7 +13,7 @@ from runner import bp, db
 
 @bp.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index_home.html')
 
 @bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -61,42 +61,14 @@ def login():
 
 @bp.route('/news')
 def news():
-    return 'news'
+    return render_template('index_new.html')
 
-@bp.route('/education')
-def education():
-    return 'education'
-
-@bp.route('/forum')
+@bp.route('/courses')
 @login_required
-def forum():
-    return 'forum'
+def courses():
+    return render_template('index_courses.html')
 
-@bp.route('/cabinet')
+@bp.route('/stocks')
 @login_required
-def cabinet():
-    return 'cabinet'
-
-@bp.route('/leaderboard')
-@login_required
-def leaderboard():
-    return 'leaderboard'
-
-@bp.route('/forum/funds')
-@login_required
-def funds():
-    return 'funds'
-
-@bp.route('/forum/shares')
-@login_required
-def shares():
-    return 'shares'
-
-@bp.route('/forum/obligation')
-@login_required
-def obligation():
-    return 'obligation'
-
-
-
-
+def stocks():
+    return render_template('index_stock.html')
