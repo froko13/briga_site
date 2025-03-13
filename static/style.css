@@ -87,7 +87,7 @@ body {
   }
   .content {
     padding: 20px;
-    display: none;
+    display: block;
   }
   .content.active {
     display: block;
