@@ -67,6 +67,18 @@
         <div class="popup-content">
             <span class="close" id="closePopup">&times;</span>
             <h1>Вход</h1>
+
+            <!-- Блок для отображения flash-сообщений -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
             <form method="POST">
                 <input type="text" name="username" placeholder="Имя пользователя" required>
                 <input type="password" name="password" placeholder="Пароль" required>

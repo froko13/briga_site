@@ -1,6 +1,7 @@
-from flask import session, redirect, url_for, g
+from flask import session, redirect, url_for, g, flash
 from functools import wraps
 from app.models import User
+
 
 def get_current_user():
     user_id = session.get('user_id')
