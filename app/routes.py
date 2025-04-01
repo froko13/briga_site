@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import login_user, login_required, logout_user, current_user, login_manager
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy import func, desc
@@ -6,10 +6,23 @@ from sqlalchemy import exc
 from datetime import datetime, timedelta
 from app.models import User
 from runner import bp, db
-
+import yfinance as yf
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import io
+import base64
 
 # Ваши маршруты
 
+ticker = 'AAPL'  # Например, Apple
+start_date = '2023-01-01'
+end_date = '2023-10-01'
+
+# Загружаем данные о ценах акций
+data = yf.download(ticker, start=start_date, end=end_date)
+dates = data.index
+close_prices = data['Close']
 
 @bp.route('/')
 def home():
@@ -72,3 +85,34 @@ def courses():
 @login_required
 def stocks():
     return render_template('index_stock.html')
+
+@bp.route('/plot')
+def plot():
+    total_steps = len(close_prices)
+    return render_template('plot.html', total_steps=total_steps)
+
+@bp.route('/plot/update_plot/<int:step>')
+def update_plot(step):
+    if step >= len(dates):
+        return jsonify({'plot': None})
+
+    # Настраиваем график
+    plt.figure(figsize=(10, 5))
+    plt.title(f'График акций {ticker}')
+    plt.xlabel('Дата')
+    plt.ylabel('Цена закрытия')
+    plt.grid()
+
+    # Постепенно отображаем данные
+    plt.plot(dates[:step+1], close_prices[:step+1], color='blue')
+
+    # Сохранение графика в буфер
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    plt.close()
+
+    # Кодирование графика в base64
+    plot_data = base64.b64encode(buf.getvalue()).decode('utf8')
+    return jsonify({'plot': plot_data})
+

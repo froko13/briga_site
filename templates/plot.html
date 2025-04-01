@@ -1,0 +1,39 @@
+{% extends "index1.html" %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анимированный график акций</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>График акций AAPL</h1>
+    <img id="plot" src="" alt="График" />
+    <button id="start-button">Начать анимацию</button>
+
+    <script>
+        $(document).ready(function() {
+            let step = 0;
+            const totalSteps = {{ total_steps }};  // Используйте значение из Flask
+    
+            $('#start-button').click(function() {
+                const interval = setInterval(function() {
+                    if (step < totalSteps) {
+                        $.getJSON(`/plot/update_plot/${step}`, function(data) {
+                            if (data.plot) {
+                                $('#plot').attr('src', 'data:image/png;base64,' + data.plot);
+                                step++;
+                            } else {
+                                clearInterval(interval);
+                            }
+                        });
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 500);  // Задержка в 500 мс
+            });
+        });
+    </script>
+</body>
+{% endblock %}
