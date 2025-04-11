@@ -7,11 +7,9 @@ from datetime import datetime, timedelta
 from app.models import User
 from runner import bp, db
 import yfinance as yf
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import io
-import base64
+
+
+
 
 # Ваши маршруты
 
@@ -88,31 +86,24 @@ def stocks():
 
 @bp.route('/plot')
 def plot():
-    total_steps = len(close_prices)
-    return render_template('plot.html', total_steps=total_steps)
+    return render_template('plot.html')
 
-@bp.route('/plot/update_plot/<int:step>')
-def update_plot(step):
-    if step >= len(dates):
-        return jsonify({'plot': None})
+@bp.route('/api/stock/<ticker>')
+def stock_data(ticker):
+    # Получаем данные о ценах акций с 1 января 2024 по 9 апреля 2025
+    stock = yf.Ticker(ticker)
+    data = stock.history(start='2024-01-01', end='2025-04-09')
+    
+    # Форматируем данные для отправки на фронтенд
+    response_data = {
+        'dates': data.index.strftime('%Y-%m-%d').tolist(),
+        'prices': data['Close'].tolist()
+    }
+    
+    return jsonify(response_data)
 
-    # Настраиваем график
-    plt.figure(figsize=(10, 5))
-    plt.title(f'График акций {ticker}')
-    plt.xlabel('Дата')
-    plt.ylabel('Цена закрытия')
-    plt.grid()
+@bp.route('/get_post_json', methods=["GET", "POST"])
+def get_post_json():    
+    data = request.get_json()
 
-    # Постепенно отображаем данные
-    plt.plot(dates[:step+1], close_prices[:step+1], color='blue')
-
-    # Сохранение графика в буфер
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    plt.close()
-
-    # Кодирование графика в base64
-    plot_data = base64.b64encode(buf.getvalue()).decode('utf8')
-    return jsonify({'plot': plot_data})
-
+    return jsonify(status="success", data=data)
